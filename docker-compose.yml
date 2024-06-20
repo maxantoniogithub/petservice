@@ -1,0 +1,44 @@
+services:
+  postgres:
+    image: postgres:13
+    container_name: pet_service_postgres_app
+    environment:
+      POSTGRES_DB: petdb
+      POSTGRES_USER: user1
+      POSTGRES_PASSWORD: pass1
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=en_US.UTF-8"
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./initdb:/docker-entrypoint-initdb.d
+      ##- ./postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U user1 -d petdb" ]
+      interval: 100s
+      timeout: 5s
+      retries: 15
+    networks:
+      - my_network
+
+  app:
+    image: maven:3.6.3-openjdk-17
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/petdb?currentSchema=petdb_schema
+      SPRING_DATASOURCE_USERNAME: user1
+      SPRING_DATASOURCE_PASSWORD: pass1
+    ports:
+      - "8081:8080"
+    volumes:
+      - ./:/app
+    command: [ "sh", "-c", "cd /app && mvn clean package && java -jar target/petservice-0.0.1-SNAPSHOT.jar" ]
+    networks:
+      - my_network
+
+networks:
+  my_network:
+
+##volumes:
+  ##postgres_data:

@@ -1,0 +1,34 @@
+type Query {
+    eligiblePets: [PetDTO]
+}
+
+type Mutation {
+    createPet(addPetCommand: AddPetCommand): PetDTO
+}
+
+input AddPetCommand {
+    owner:PetOwnerInput
+    weight:Int
+    breed:String
+    vaccinationStatus:Boolean
+    trainingLevel:Int
+}
+
+input PetOwnerInput {
+    ownerId:String
+    ownerName:String
+}
+
+type PetDTO {
+    id:ID!
+    owner:PetOwnerDTO
+    weight:Int
+    breed:String
+    vaccinationStatus:Boolean
+    trainingLevel:Int
+}
+
+type PetOwnerDTO {
+    ownerId:String
+    ownerName:String
+}
